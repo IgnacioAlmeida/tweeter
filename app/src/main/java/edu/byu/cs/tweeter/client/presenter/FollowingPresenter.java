@@ -1,19 +1,31 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import android.content.Intent;
+import android.widget.Toast;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
+import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
+
+import static java.security.AccessController.getContext;
 
 public class FollowingPresenter {
     private static final int PAGE_SIZE = 10;
 
+    //The View tells the fragment what to show
     public interface View {
         void displayErrorMessage(String message);
-        void displayExceptionMessage(String message);
+
         void setLoadingStatus(boolean value);
+
         void addFollowees(List<User> followees);
+
+        void handleSuccess(User user);
     }
 
     private View view;
@@ -55,6 +67,10 @@ public class FollowingPresenter {
 
     }
 
+    public void loadUser(String userAlias) {
+        followService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
+    }
+
     public class GetFollowingObserver implements FollowService.GetFollowingObserver {
 
         @Override
@@ -62,7 +78,7 @@ public class FollowingPresenter {
             isLoading = false;
             view.setLoadingStatus(false);
             lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
-            setHasMorePages(hasMorePages );
+            setHasMorePages(hasMorePages);
             view.addFollowees(followees);
         }
 
@@ -77,8 +93,27 @@ public class FollowingPresenter {
         public void handleException(Exception exception) {
             isLoading = false;
             view.setLoadingStatus(false);
-            view.displayExceptionMessage("Failed to get following because of exception: " + exception.getMessage());
+            view.displayErrorMessage("Failed to get following because of exception: " + exception.getMessage());
 
+        }
+    }
+
+    public class GetUserObserver implements FollowService.GetUserObserver {
+        @Override
+        public void handleSuccess(User user) {
+            view.handleSuccess(user);
+
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to get user's profile: " + message);
+
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to get user's profile because of exception: " + exception.getMessage());
         }
     }
 }
