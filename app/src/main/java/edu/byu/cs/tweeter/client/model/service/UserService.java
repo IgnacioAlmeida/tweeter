@@ -24,6 +24,7 @@ public class UserService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getUserTask);
     }
+
     /**
      * Message handler (i.e., observer) for GetUserTask.
      */
