@@ -1,18 +1,12 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import android.content.Intent;
-import android.widget.Toast;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
-import edu.byu.cs.tweeter.client.view.main.MainActivity;
-import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 
-import static java.security.AccessController.getContext;
+import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowingPresenter {
     private static final int PAGE_SIZE = 10;
@@ -30,6 +24,7 @@ public class FollowingPresenter {
 
     private View view;
     private FollowService followService;
+    private UserService userService;
 
     private User lastFollowee;
 
@@ -56,6 +51,7 @@ public class FollowingPresenter {
     public FollowingPresenter(View view) {
         this.view = view;
         followService = new FollowService();
+        userService = new UserService();
     }
 
     public void loadMoreItems(User user) {
@@ -68,7 +64,7 @@ public class FollowingPresenter {
     }
 
     public void loadUser(String userAlias) {
-        followService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
+        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
     }
 
     public class GetFollowingObserver implements FollowService.GetFollowingObserver {
@@ -98,7 +94,7 @@ public class FollowingPresenter {
         }
     }
 
-    public class GetUserObserver implements FollowService.GetUserObserver {
+    public class GetUserObserver implements UserService.GetUserObserver {
         @Override
         public void handleSuccess(User user) {
             view.handleSuccess(user);
