@@ -63,9 +63,6 @@ public class FollowingPresenter {
 
     }
 
-    public void loadUser(String userAlias) {
-        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
-    }
 
     public class GetFollowingObserver implements FollowService.GetFollowingObserver {
 
@@ -92,6 +89,10 @@ public class FollowingPresenter {
             view.displayErrorMessage("Failed to get following because of exception: " + exception.getMessage());
 
         }
+    }
+
+    public void loadUser(String userAlias) {
+        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
     }
 
     public class GetUserObserver implements UserService.GetUserObserver {
