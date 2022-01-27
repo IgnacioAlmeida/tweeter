@@ -100,7 +100,6 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
                 }
             }
         });
-
         return view;
     }
 
@@ -115,7 +114,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
             imageUploaderButton.setText(R.string.afterUploadPicture);
         }
     }
-    
+
     @Override
     public void displayErrorMessage(String message) {
         Toast.makeText(getContext(),message , Toast.LENGTH_LONG).show();
