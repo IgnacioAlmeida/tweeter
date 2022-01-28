@@ -1,8 +1,12 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import android.widget.Toast;
+import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -13,13 +17,20 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivityPresenter {
 
 
+
+
     public interface View {
         void displayErrorMessage(String message);
-        void handleSuccess();
+        void handleSuccess(boolean follow);
+        void handleSuccessFollowees(int count);
+        void handleSuccessFollowers(int count);
 
     }
     private View view;
@@ -86,8 +97,8 @@ public class MainActivityPresenter {
     public class GetUnfollowObserver implements FollowService.GetUnfollowObserver {
 
         @Override
-        public void handleSuccess() {
-            view.handleSuccess();
+        public void handleSuccess(boolean follow) {
+            view.handleSuccess(false);
         }
 
         @Override
@@ -103,4 +114,78 @@ public class MainActivityPresenter {
         }
     }
 
+    public void follow(User selectedUser) {
+        followService.follow(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowObserver());
+    }
+
+    public class GetFollowObserver implements FollowService.GetFollowObserver {
+
+        @Override
+        public void handleSuccess(boolean follow) {
+            view.handleSuccess(true);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to unfollow: " + message);
+
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
+
+        }
+    }
+
+
+    public void getFollowingCounter(User selectedUser, Executor executor) {
+        followService.getFollowingCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowingCounterObserver(), executor);
+    }
+
+    public class GetFollowingCounterObserver implements FollowService.GetFollowingCounterObserver {
+
+        @Override
+        public void handleSuccess(int count) {
+            view.handleSuccessFollowees(count);
+
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to get following count: " + message);
+
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to get following count because of exception: " + exception.getMessage());
+
+        }
+    }
+
+
+    public void getFollowersCounter(User selectedUser, Executor executor) {
+        followService.getFollowersCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowersCounterObserver(), executor);
+    }
+
+    public class GetFollowersCounterObserver implements FollowService.GetFollowersCounterObserver {
+
+        @Override
+        public void handleSuccess(int count) {
+            view.handleSuccessFollowers(count);
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to get followers count: " + message);
+
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to get followers count because of exception: "+ exception.getMessage());
+
+        }
+    }
 }
