@@ -135,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             logOutToast = Toast.makeText(this, "Logging Out...", Toast.LENGTH_LONG);
             logOutToast.show();
             presenter.logout();
-
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -148,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         //Clear everything so that the main activity is recreated with the login page.
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         //Clear user data (cached data).
-        Cache.getInstance().clearCache();
         startActivity(intent);
     }
 

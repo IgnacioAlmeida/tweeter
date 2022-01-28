@@ -1,14 +1,9 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import android.widget.Toast;
-import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.*;
-import edu.byu.cs.tweeter.client.view.main.MainActivity;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -20,8 +15,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivityPresenter {
 
@@ -47,6 +40,7 @@ public class MainActivityPresenter {
         this.view = view;
         followService = new FollowService();
         feedService = new FeedService();
+        loginService = new LoginService();
 
     }
 
@@ -225,6 +219,7 @@ public class MainActivityPresenter {
 
     public void logout() {
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new GetLogoutObserver());
+        Cache.getInstance().clearCache();//TODO Is this the right place to clear cache?
     }
 
     public class GetLogoutObserver implements LoginService.GetLogoutObserver {
@@ -254,12 +249,10 @@ public class MainActivityPresenter {
     }
 
     public class GetIsFollowerObserver implements FollowService.GetIsFollowerObserver {
-
         @Override
         public void handleSuccess(boolean isFollower) {
             if (isFollower) {
                 view.handleIsFollowerSuccess(true);
-
             } else {
                 view.handleIsFollowerSuccess(false);
             }
@@ -280,16 +273,13 @@ public class MainActivityPresenter {
 
     public List<String> parseMentions(String post) {
         List<String> containedMentions = new ArrayList<>();
-
         for (String word : post.split("\\s")) {
             if (word.startsWith("@")) {
                 word = word.replaceAll("[^a-zA-Z0-9]", "");
                 word = "@".concat(word);
-
                 containedMentions.add(word);
             }
         }
-
         return containedMentions;
     }
 
