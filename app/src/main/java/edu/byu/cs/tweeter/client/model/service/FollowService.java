@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.client.model.service;
 import android.os.Handler;
 import android.os.Message;
 
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.*;
 import edu.byu.cs.tweeter.client.presenter.MainActivityPresenter;
+import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -218,8 +221,6 @@ public class FollowService {
         }
     }
 
-
-
     public interface GetFollowersCounterObserver {
         void handleSuccess(int count);
         void handleFailure(String message);
@@ -250,6 +251,48 @@ public class FollowService {
                 observer.handleFailure(message);
             } else if (msg.getData().containsKey(GetFollowersCountTask.EXCEPTION_KEY)) {
                 Exception ex = (Exception) msg.getData().getSerializable(GetFollowersCountTask.EXCEPTION_KEY);
+                observer.handleException(ex);
+            }
+        }
+    }
+
+
+    public interface GetIsFollowerObserver {
+        void handleSuccess(boolean isFollower);
+        void handleFailure(String message);
+        void handleException(Exception exception);
+    }
+
+    public void isFollower(AuthToken currUserAuthToken, User currUser, User selectedUser, GetIsFollowerObserver getIsFollowerObserver) {
+        IsFollowerTask isFollowerTask = new IsFollowerTask(currUserAuthToken,
+                currUser, selectedUser, new IsFollowerHandler(getIsFollowerObserver));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(isFollowerTask);
+    }
+
+    // IsFollowerHandler
+
+    private class IsFollowerHandler extends Handler {
+        GetIsFollowerObserver observer;
+        public IsFollowerHandler(GetIsFollowerObserver observer) {
+            this.observer = observer;
+        }
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            boolean success = msg.getData().getBoolean(IsFollowerTask.SUCCESS_KEY);
+            if (success) {
+                boolean isFollower = msg.getData().getBoolean(IsFollowerTask.IS_FOLLOWER_KEY);
+                // If logged in user if a follower of the selected user, display the follow button as "following"
+                if (isFollower) {
+                    observer.handleSuccess(true);
+                } else {
+                    observer.handleSuccess(false);
+                }
+            } else if (msg.getData().containsKey(IsFollowerTask.MESSAGE_KEY)) {
+                String message = msg.getData().getString(IsFollowerTask.MESSAGE_KEY);
+                observer.handleFailure(message);
+            } else if (msg.getData().containsKey(IsFollowerTask.EXCEPTION_KEY)) {
+                Exception ex = (Exception) msg.getData().getSerializable(IsFollowerTask.EXCEPTION_KEY);
                 observer.handleException(ex);
             }
         }

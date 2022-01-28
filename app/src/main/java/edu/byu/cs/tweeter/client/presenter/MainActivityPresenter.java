@@ -35,6 +35,7 @@ public class MainActivityPresenter {
         void handleSuccessFollowers(int count);
         void handlePostSuccess();
         void handleLogoutSuccess();
+        void handleIsFollowerSuccess(boolean isFollower);
 
     }
     private View view;
@@ -245,4 +246,52 @@ public class MainActivityPresenter {
 
         }
     }
+
+
+    public void isFollower(User selectedUser) {
+        followService.isFollower(Cache.getInstance().getCurrUserAuthToken(),
+                Cache.getInstance().getCurrUser(), selectedUser, new GetIsFollowerObserver());
+    }
+
+    public class GetIsFollowerObserver implements FollowService.GetIsFollowerObserver {
+
+        @Override
+        public void handleSuccess(boolean isFollower) {
+            if (isFollower) {
+                view.handleIsFollowerSuccess(true);
+
+            } else {
+                view.handleIsFollowerSuccess(false);
+            }
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to determine following relationship: " + message);
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to determine following relationship because of exception: " + exception.getMessage());
+        }
+    }
+
+
+
+    public List<String> parseMentions(String post) {
+        List<String> containedMentions = new ArrayList<>();
+
+        for (String word : post.split("\\s")) {
+            if (word.startsWith("@")) {
+                word = word.replaceAll("[^a-zA-Z0-9]", "");
+                word = "@".concat(word);
+
+                containedMentions.add(word);
+            }
+        }
+
+        return containedMentions;
+    }
+
+
 }
