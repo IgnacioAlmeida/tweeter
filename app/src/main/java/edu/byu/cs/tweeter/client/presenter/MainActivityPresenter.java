@@ -5,11 +5,10 @@ import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
+import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.*;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -35,11 +34,13 @@ public class MainActivityPresenter {
         void handleSuccessFollowees(int count);
         void handleSuccessFollowers(int count);
         void handlePostSuccess();
+        void handleLogoutSuccess();
 
     }
     private View view;
     private FollowService followService;
     private FeedService feedService;
+    private LoginService loginService;
 
     public MainActivityPresenter(View view) {
         this.view = view;
@@ -221,4 +222,27 @@ public class MainActivityPresenter {
         }
     }
 
+    public void logout() {
+        loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new GetLogoutObserver());
+    }
+
+    public class GetLogoutObserver implements LoginService.GetLogoutObserver {
+
+        @Override
+        public void handleSuccess() {
+            view.handleLogoutSuccess();
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to logout: " + message);
+
+        }
+
+        @Override
+        public void handleException(Exception ex) {
+            view.displayErrorMessage("Failed to logout because of exception: " + ex.getMessage());
+
+        }
+    }
 }
