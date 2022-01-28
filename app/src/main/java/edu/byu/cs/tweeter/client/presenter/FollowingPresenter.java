@@ -87,7 +87,6 @@ public class FollowingPresenter {
             isLoading = false;
             view.setLoadingStatus(false);
             view.displayErrorMessage("Failed to get following because of exception: " + exception.getMessage());
-
         }
     }
 
