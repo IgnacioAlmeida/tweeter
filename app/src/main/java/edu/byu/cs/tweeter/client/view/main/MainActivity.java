@@ -182,10 +182,8 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
         try {
             Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), presenter.getFormattedDateTime(), presenter.parseURLs(post), parseMentions(post));
-            PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
-                    newStatus, new PostStatusHandler());
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(statusTask);
+            presenter.postStatus(newStatus);
+
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);
             Toast.makeText(this, "Failed to post the status because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -261,6 +259,12 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         followerCount.setText(getString(R.string.followerCount, String.valueOf(count)));
     }
 
+    @Override
+    public void handlePostSuccess() {
+        postingToast.cancel();
+        Toast.makeText(MainActivity.this, "Successfully Posted!", Toast.LENGTH_LONG).show();
+    }
+
     // LogoutHandler
 
     private class LogoutHandler extends Handler {
@@ -304,27 +308,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             } else if (msg.getData().containsKey(IsFollowerTask.EXCEPTION_KEY)) {
                 Exception ex = (Exception) msg.getData().getSerializable(IsFollowerTask.EXCEPTION_KEY);
                 Toast.makeText(MainActivity.this, "Failed to determine following relationship because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-
-
-    // PostStatusHandler
-
-    private class PostStatusHandler extends Handler {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(PostStatusTask.SUCCESS_KEY);
-            if (success) {
-                postingToast.cancel();
-                Toast.makeText(MainActivity.this, "Successfully Posted!", Toast.LENGTH_LONG).show();
-            } else if (msg.getData().containsKey(PostStatusTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(PostStatusTask.MESSAGE_KEY);
-                Toast.makeText(MainActivity.this, "Failed to post status: " + message, Toast.LENGTH_LONG).show();
-            } else if (msg.getData().containsKey(PostStatusTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(PostStatusTask.EXCEPTION_KEY);
-                Toast.makeText(MainActivity.this, "Failed to post status because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }

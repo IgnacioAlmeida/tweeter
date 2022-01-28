@@ -7,7 +7,10 @@ import androidx.annotation.NonNull;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.presenter.FeedPresenter;
+import edu.byu.cs.tweeter.client.presenter.MainActivityPresenter;
+import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -52,6 +55,41 @@ public class FeedService {
                 observer.handleFailure(message);
             } else if (msg.getData().containsKey(GetFeedTask.EXCEPTION_KEY)) {
                 Exception ex = (Exception) msg.getData().getSerializable(GetFeedTask.EXCEPTION_KEY);
+                observer.handleException(ex);
+            }
+        }
+    }
+
+
+    public interface GetPostStatusObserver {
+        void handleSuccess();
+        void handleFailure(String message);
+        void handleException(Exception exception);
+    }
+
+    public void postStatus(AuthToken currUserAuthToken, Status newStatus, GetPostStatusObserver getPostStatusObserver) {
+        PostStatusTask statusTask = new PostStatusTask(currUserAuthToken,
+                newStatus, new PostStatusHandler(getPostStatusObserver));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(statusTask);
+    }
+    // PostStatusHandler
+
+    private class PostStatusHandler extends Handler {
+        GetPostStatusObserver observer;
+        public PostStatusHandler(GetPostStatusObserver observer) {
+            this.observer = observer;
+        }
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            boolean success = msg.getData().getBoolean(PostStatusTask.SUCCESS_KEY);
+            if (success) {
+                observer.handleSuccess();
+            } else if (msg.getData().containsKey(PostStatusTask.MESSAGE_KEY)) {
+                String message = msg.getData().getString(PostStatusTask.MESSAGE_KEY);
+                observer.handleFailure(message);
+            } else if (msg.getData().containsKey(PostStatusTask.EXCEPTION_KEY)) {
+                Exception ex = (Exception) msg.getData().getSerializable(PostStatusTask.EXCEPTION_KEY);
                 observer.handleException(ex);
             }
         }

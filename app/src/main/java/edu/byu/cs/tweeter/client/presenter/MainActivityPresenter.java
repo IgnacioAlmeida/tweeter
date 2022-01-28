@@ -3,11 +3,14 @@ package edu.byu.cs.tweeter.client.presenter;
 import android.widget.Toast;
 import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 import java.net.MalformedURLException;
@@ -31,14 +34,18 @@ public class MainActivityPresenter {
         void handleSuccess(boolean follow);
         void handleSuccessFollowees(int count);
         void handleSuccessFollowers(int count);
+        void handlePostSuccess();
 
     }
     private View view;
     private FollowService followService;
+    private FeedService feedService;
 
     public MainActivityPresenter(View view) {
         this.view = view;
         followService = new FollowService();
+        feedService = new FeedService();
+
     }
 
     public String getFormattedDateTime() throws ParseException {
@@ -188,4 +195,30 @@ public class MainActivityPresenter {
 
         }
     }
+
+
+    public void postStatus(Status newStatus) {
+        feedService.postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
+
+    }
+
+    public class GetPostStatusObserver implements FeedService.GetPostStatusObserver {
+
+        @Override
+        public void handleSuccess() {
+            view.handlePostSuccess();
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to post status: " + message);
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to post status because of exception: " + exception.getMessage());
+
+        }
+    }
+
 }
