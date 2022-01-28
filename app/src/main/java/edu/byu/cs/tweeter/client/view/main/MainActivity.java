@@ -41,6 +41,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.presenter.MainActivityPresenter;
 import edu.byu.cs.tweeter.client.view.login.LoginActivity;
 import edu.byu.cs.tweeter.client.view.login.StatusDialogFragment;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -49,7 +50,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * The main activity for the application. Contains tabs for feed, story, following, and followers.
  */
-public class MainActivity extends AppCompatActivity implements StatusDialogFragment.Observer {
+public class MainActivity extends AppCompatActivity implements StatusDialogFragment.Observer, MainActivityPresenter.View {
 
     private static final String LOG_TAG = "MainActivity";
 
@@ -61,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     private TextView followeeCount;
     private TextView followerCount;
     private Button followButton;
+
+    private MainActivityPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +111,8 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
         followButton = findViewById(R.id.followButton);
 
+        presenter = new MainActivityPresenter(this);
+
         if (selectedUser.compareTo(Cache.getInstance().getCurrUser()) == 0) {
             followButton.setVisibility(View.GONE);
         } else {
@@ -124,12 +129,9 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
                 followButton.setEnabled(false);
 
                 if (followButton.getText().toString().equals(v.getContext().getString(R.string.following))) {
-                    UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
-                            selectedUser, new UnfollowHandler());
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    executor.execute(unfollowTask);
-
                     Toast.makeText(MainActivity.this, "Removing " + selectedUser.getName() + "...", Toast.LENGTH_LONG).show();
+                    presenter.unfollow(selectedUser);
+                    followButton.setEnabled(true);
                 } else {
                     FollowTask followTask = new FollowTask(Cache.getInstance().getCurrUserAuthToken(),
                             selectedUser, new FollowHandler());
@@ -181,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         postingToast.show();
 
         try {
-            Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), getFormattedDateTime(), parseURLs(post), parseMentions(post));
+            Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), presenter.getFormattedDateTime(), presenter.parseURLs(post), parseMentions(post));
             PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
                     newStatus, new PostStatusHandler());
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -192,28 +194,9 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         }
     }
 
-    public String getFormattedDateTime() throws ParseException {
-        SimpleDateFormat userFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        SimpleDateFormat statusFormat = new SimpleDateFormat("MMM d yyyy h:mm aaa");
 
-        return statusFormat.format(userFormat.parse(LocalDate.now().toString() + " " + LocalTime.now().toString().substring(0, 8)));
-    }
 
-    public List<String> parseURLs(String post) throws MalformedURLException {
-        List<String> containedUrls = new ArrayList<>();
-        for (String word : post.split("\\s")) {
-            if (word.startsWith("http://") || word.startsWith("https://")) {
 
-                int index = findUrlEndIndex(word);
-
-                word = word.substring(0, index);
-
-                containedUrls.add(word);
-            }
-        }
-
-        return containedUrls;
-    }
 
     public List<String> parseMentions(String post) {
         List<String> containedMentions = new ArrayList<>();
@@ -230,31 +213,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         return containedMentions;
     }
 
-    public int findUrlEndIndex(String word) {
-        if (word.contains(".com")) {
-            int index = word.indexOf(".com");
-            index += 4;
-            return index;
-        } else if (word.contains(".org")) {
-            int index = word.indexOf(".org");
-            index += 4;
-            return index;
-        } else if (word.contains(".edu")) {
-            int index = word.indexOf(".edu");
-            index += 4;
-            return index;
-        } else if (word.contains(".net")) {
-            int index = word.indexOf(".net");
-            index += 4;
-            return index;
-        } else if (word.contains(".mil")) {
-            int index = word.indexOf(".mil");
-            index += 4;
-            return index;
-        } else {
-            return word.length();
-        }
-    }
 
     public void updateSelectedUserFollowingAndFollowers() {
         ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -280,6 +238,18 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             followButton.setBackgroundColor(getResources().getColor(R.color.white));
             followButton.setTextColor(getResources().getColor(R.color.lightGray));
         }
+    }
+
+    @Override
+    public void displayErrorMessage(String message) {
+        Toast.makeText(MainActivity.this,message , Toast.LENGTH_LONG).show();
+
+    }
+
+    @Override
+    public void handleSuccess() {
+        updateSelectedUserFollowingAndFollowers();
+        updateFollowButton(true);
     }
 
     // LogoutHandler
@@ -388,26 +358,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         }
     }
 
-    // UnfollowHandler
-
-    private class UnfollowHandler extends Handler {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(UnfollowTask.SUCCESS_KEY);
-            if (success) {
-                updateSelectedUserFollowingAndFollowers();
-                updateFollowButton(true);
-            } else if (msg.getData().containsKey(UnfollowTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(UnfollowTask.MESSAGE_KEY);
-                Toast.makeText(MainActivity.this, "Failed to unfollow: " + message, Toast.LENGTH_LONG).show();
-            } else if (msg.getData().containsKey(UnfollowTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(UnfollowTask.EXCEPTION_KEY);
-                Toast.makeText(MainActivity.this, "Failed to unfollow because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-            }
-
-            followButton.setEnabled(true);
-        }
-    }
 
     // PostStatusHandler
 
