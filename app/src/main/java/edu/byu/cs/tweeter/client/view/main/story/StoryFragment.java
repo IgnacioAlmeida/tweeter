@@ -53,7 +53,6 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
 
-    private static final int PAGE_SIZE = 10;
 
     private User user;
     private StoryPresenter presenter;
@@ -89,16 +88,14 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
         LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
         storyRecyclerView.setLayoutManager(layoutManager);
 
-        try {
-            storyRecyclerViewAdapter = new StoryRecyclerViewAdapter();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        storyRecyclerViewAdapter = new StoryRecyclerViewAdapter();
         storyRecyclerView.setAdapter(storyRecyclerViewAdapter);
 
         storyRecyclerView.addOnScrollListener(new StoryRecyclerViewPaginationScrollListener(layoutManager));
 
         presenter = new StoryPresenter(this);
+        presenter.loadMoreItems(user);
+
         return view;
     }
 
@@ -107,6 +104,21 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
         startActivity(intent);
+    }
+
+    @Override
+    public void setLoadingStatus(boolean value) {
+        if(value) {
+            storyRecyclerViewAdapter.addLoadingFooter();
+        }
+        else {
+            storyRecyclerViewAdapter.removeLoadingFooter();
+        }
+    }
+
+    @Override
+    public void handleFeedSuccess(List<Status> statuses) {
+        storyRecyclerViewAdapter.addItems(statuses);
     }
 
     @Override
@@ -213,17 +225,6 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
     private class StoryRecyclerViewAdapter extends RecyclerView.Adapter<StoryHolder> {
 
         private final List<Status> story = new ArrayList<>();
-        private Status lastStatus;
-
-        private boolean hasMorePages;
-        private boolean isLoading = false;
-
-        /**
-         * Creates an instance and loads the first page of story data.
-         */
-        StoryRecyclerViewAdapter() throws MalformedURLException {
-            loadMoreItems();
-        }
 
         /**
          * Adds new statuses to the list from which the RecyclerView retrieves the statuses it displays
@@ -294,7 +295,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
          */
         @Override
         public void onBindViewHolder(@NonNull StoryHolder storyHolder, int position) {
-            if (!isLoading) {
+            if (!presenter.isLoading()) {
                 storyHolder.bindStatus(story.get(position));
             }
         }
@@ -318,7 +319,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
          */
         @Override
         public int getItemViewType(int position) {
-            return (position == story.size() - 1 && isLoading) ? LOADING_DATA_VIEW : ITEM_VIEW;
+            return (position == story.size() - 1 && presenter.isLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
         }
 
         /**
@@ -326,15 +327,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
          * data.
          */
         void loadMoreItems() throws MalformedURLException {
-            if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
-                isLoading = true;
-                addLoadingFooter();
-
-                GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
-                        user, PAGE_SIZE, lastStatus, new GetStoryHandler());
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                executor.execute(getStoryTask);
-            }
+            presenter.loadMoreItems(user);
         }
 
         /**
@@ -357,33 +350,6 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
             removeItem(story.get(story.size() - 1));
         }
 
-
-        /**
-         * Message handler (i.e., observer) for GetStoryTask.
-         */
-        private class GetStoryHandler extends Handler {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                isLoading = false;
-                removeLoadingFooter();
-
-                boolean success = msg.getData().getBoolean(GetStoryTask.SUCCESS_KEY);
-                if (success) {
-                    List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetStoryTask.STATUSES_KEY);
-                    hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
-
-                    lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-
-                    storyRecyclerViewAdapter.addItems(statuses);
-                } else if (msg.getData().containsKey(GetStoryTask.MESSAGE_KEY)) {
-                    String message = msg.getData().getString(GetStoryTask.MESSAGE_KEY);
-                    Toast.makeText(getContext(), "Failed to get story: " + message, Toast.LENGTH_LONG).show();
-                } else if (msg.getData().containsKey(GetStoryTask.EXCEPTION_KEY)) {
-                    Exception ex = (Exception) msg.getData().getSerializable(GetStoryTask.EXCEPTION_KEY);
-                    Toast.makeText(getContext(), "Failed to get story because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
-        }
     }
 
     /**
@@ -420,7 +386,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
             int totalItemCount = layoutManager.getItemCount();
             int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-            if (!storyRecyclerViewAdapter.isLoading && storyRecyclerViewAdapter.hasMorePages) {
+            if (!presenter.isLoading() && presenter.hasMorePages()) {
                 if ((visibleItemCount + firstVisibleItemPosition) >=
                         totalItemCount && firstVisibleItemPosition >= 0) {
                     // Run this code later on the UI thread

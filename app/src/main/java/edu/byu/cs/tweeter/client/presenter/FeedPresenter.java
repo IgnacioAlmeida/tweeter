@@ -39,9 +39,6 @@ public class FeedPresenter {
         return isLoading;
     }
 
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
 
     public FeedPresenter(View view) {
         this.view = view;
