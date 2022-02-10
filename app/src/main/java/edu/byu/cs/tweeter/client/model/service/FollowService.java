@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.*;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersCountHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingCountHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.CounterNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CounterObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -67,28 +67,22 @@ public class FollowService {
     }
 
 
-    public interface GetFollowingCounterObserver {
-        void handleSuccess(int count);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public interface GetFollowingCounterObserver extends CounterObserver {
     }
 
     public void getFollowingCounter(AuthToken currUserAuthToken, User selectedUser, GetFollowingCounterObserver getFollowingCounterObserver, Executor executor) {
         GetFollowingCountTask followingCountTask = new GetFollowingCountTask(currUserAuthToken,
-                selectedUser, new GetFollowingCountHandler(getFollowingCounterObserver));
+                selectedUser, new CounterNotificationHandler(getFollowingCounterObserver));
         executor.execute(followingCountTask);
     }
     // GetFollowingCountHandler
 
-    public interface GetFollowersCounterObserver {
-        void handleSuccess(int count);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public interface GetFollowersCounterObserver extends CounterObserver{
     }
 
     public void getFollowersCounter(AuthToken currUserAuthToken, User selectedUser, GetFollowersCounterObserver getFollowersCounterObserver, Executor executor) {
         GetFollowersCountTask followersCountTask = new GetFollowersCountTask(currUserAuthToken,
-                selectedUser, new GetFollowersCountHandler(getFollowersCounterObserver));
+                selectedUser, new CounterNotificationHandler(getFollowersCounterObserver));
         executor.execute(followersCountTask);
     }
     // GetFollowersCountHandler

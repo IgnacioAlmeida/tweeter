@@ -1,17 +1,19 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 
-public class GetFollowingCountHandler extends Handler {
-    FollowService.GetFollowingCounterObserver observer;
+public abstract class CounterTaskHandler<T extends ServiceObserver> extends Handler {
 
-    public GetFollowingCountHandler(FollowService.GetFollowingCounterObserver observer) {
+    private T observer;
+
+    public CounterTaskHandler(T observer) {
         this.observer = observer;
     }
 
@@ -20,7 +22,7 @@ public class GetFollowingCountHandler extends Handler {
         boolean success = msg.getData().getBoolean(GetFollowingCountTask.SUCCESS_KEY);
         if (success) {
             int count = msg.getData().getInt(GetFollowingCountTask.COUNT_KEY);
-            observer.handleSuccess(count);
+            handleSuccess(msg.getData(), observer, count);
 
         } else if (msg.getData().containsKey(GetFollowingCountTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(GetFollowingCountTask.MESSAGE_KEY);
@@ -30,4 +32,6 @@ public class GetFollowingCountHandler extends Handler {
             observer.handleException(ex);
         }
     }
+
+    protected abstract void handleSuccess(Bundle data, T observer, int count);
 }
