@@ -203,11 +203,6 @@ public class MainActivityPresenter {
     public class GetPostStatusObserver implements FeedService.GetPostStatusObserver {
 
         @Override
-        public void handleSuccess() {
-            view.handlePostSuccess();
-        }
-
-        @Override
         public void handleFailure(String message) {
             view.displayErrorMessage("Failed to post status: " + message);
         }
@@ -216,6 +211,11 @@ public class MainActivityPresenter {
         public void handleException(Exception exception) {
             view.displayErrorMessage("Failed to post status because of exception: " + exception.getMessage());
 
+        }
+
+        @Override
+        public void handleSuccess(Boolean status) {
+            view.handlePostSuccess();
         }
     }
 

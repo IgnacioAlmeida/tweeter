@@ -3,8 +3,9 @@ package edu.byu.cs.tweeter.client.model.service;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PostStatusHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -25,15 +26,12 @@ public class FeedService {
     }
 
 
-    public interface GetPostStatusObserver {
-        void handleSuccess();
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public interface GetPostStatusObserver extends SimpleNotificationObserver {
     }
 
     public void postStatus(AuthToken currUserAuthToken, Status newStatus, GetPostStatusObserver getPostStatusObserver) {
         PostStatusTask statusTask = new PostStatusTask(currUserAuthToken,
-                newStatus, new PostStatusHandler(getPostStatusObserver));
+                newStatus, new SimpleNotificationHandler(getPostStatusObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(statusTask);
     }
