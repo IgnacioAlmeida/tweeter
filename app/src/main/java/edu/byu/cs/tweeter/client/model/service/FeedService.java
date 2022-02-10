@@ -4,6 +4,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFeedHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PostStatusHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -14,10 +15,7 @@ import java.util.concurrent.Executors;
 
 public class FeedService {
 
-    public interface GetFeedObserver {
-        void handleSuccess(List<Status> statuses, boolean hasMorePages);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public interface GetFeedObserver extends PagedObserver<Status> {
     }
 
     public void getFeed(AuthToken currUserAuthToken, User user, int pageSize, Status lastStatus, GetFeedObserver getFeedObserver) {
@@ -40,6 +38,5 @@ public class FeedService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(statusTask);
     }
-    // PostStatusHandler
 
 }

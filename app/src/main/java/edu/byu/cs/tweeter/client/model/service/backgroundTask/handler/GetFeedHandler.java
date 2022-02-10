@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
@@ -10,31 +11,22 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Message handler (i.e., observer) for GetFeedTask.
  */
-public class GetFeedHandler extends Handler {
-    FeedService.GetFeedObserver observer;
+public class GetFeedHandler extends PagedNotificationHandler<PagedObserver> {
 
     public GetFeedHandler(FeedService.GetFeedObserver observer) {
-        this.observer = observer;
+        super(observer);
     }
 
     @Override
-    public void handleMessage(@NonNull Message msg) {
-        boolean success = msg.getData().getBoolean(GetFeedTask.SUCCESS_KEY);
-        if (success) {
-            List<Status> statuses = (List<Status>) msg.getData().getSerializable(PagedTask.ITEMS_KEY);
-            boolean hasMorePages = msg.getData().getBoolean(GetFeedTask.MORE_PAGES_KEY);
-            observer.handleSuccess(statuses, hasMorePages);
-        } else if (msg.getData().containsKey(GetFeedTask.MESSAGE_KEY)) {
-            String message = msg.getData().getString(GetFeedTask.MESSAGE_KEY);
-            observer.handleFailure(message);
-        } else if (msg.getData().containsKey(GetFeedTask.EXCEPTION_KEY)) {
-            Exception ex = (Exception) msg.getData().getSerializable(GetFeedTask.EXCEPTION_KEY);
-            observer.handleException(ex);
-        }
+    protected void handleSuccess(Bundle data, PagedObserver observer, List<PagedObserver> list, boolean hasMorePages) {
+        observer.handleSuccess(list, hasMorePages);
+
     }
 }

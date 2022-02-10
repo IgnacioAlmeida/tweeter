@@ -24,7 +24,7 @@ public class GetFollowersHandler extends PagedNotificationHandler<PagedObserver>
     }
 
     @Override
-    protected void handleSuccess(Bundle data, PagedObserver observer, List<User> followers, boolean hasMorePages) {
-        observer.handleSuccess(followers, hasMorePages);
+    protected void handleSuccess(Bundle data, PagedObserver observer, List<PagedObserver> list, boolean hasMorePages) {
+        observer.handleSuccess(list, hasMorePages);
     }
 }

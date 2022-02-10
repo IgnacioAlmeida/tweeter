@@ -25,9 +25,9 @@ public abstract class PagedNotificationHandler<T extends ServiceObserver> extend
     public void handleMessage(@NonNull Message msg) {
         boolean success = msg.getData().getBoolean(GetFollowersTask.SUCCESS_KEY);
         if (success) {
-            List<User> followers = (List<User>) msg.getData().getSerializable(PagedTask.ITEMS_KEY);
+            List<T> list = (List<T>) msg.getData().getSerializable(PagedTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFollowersTask.MORE_PAGES_KEY);
-            handleSuccess(msg.getData(), observer, followers, hasMorePages);
+            handleSuccess(msg.getData(), observer, list, hasMorePages);
 
         } else if (msg.getData().containsKey(GetFollowersTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(GetFollowersTask.MESSAGE_KEY);
@@ -38,6 +38,6 @@ public abstract class PagedNotificationHandler<T extends ServiceObserver> extend
         }
     }
 
-    protected abstract void handleSuccess(Bundle data, T observer, List<User> followers, boolean hasMorePages);
+    protected abstract void handleSuccess(Bundle data, T observer, List<T> list, boolean hasMorePages);
 
 }
