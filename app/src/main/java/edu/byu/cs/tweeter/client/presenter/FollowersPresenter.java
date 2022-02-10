@@ -57,15 +57,6 @@ public class FollowersPresenter {
     public class GetFollowersObserver implements FollowService.GetFollowersObserver {
 
         @Override
-        public void handleSuccess(List<User> followers, boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.addFollowers(followers);
-        }
-
-        @Override
         public void handleFailure(String message) {
             isLoading = false;
             view.setLoadingStatus(false);
@@ -78,6 +69,15 @@ public class FollowersPresenter {
             isLoading = false;
             view.setLoadingStatus(false);
             view.displayErrorMessage("Failed to get followers because of exception: " + exception.getMessage());
+        }
+
+        @Override
+        public void handleSuccess(List list, boolean hasMorePages) {
+            isLoading = false;
+            view.setLoadingStatus(false);
+            lastFollower = (list.size() > 0) ? (User) list.get(list.size() - 1) : null;
+            setHasMorePages(hasMorePages);
+            view.addFollowers(list);
         }
     }
 

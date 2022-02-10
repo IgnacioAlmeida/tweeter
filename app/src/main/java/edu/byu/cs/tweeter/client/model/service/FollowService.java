@@ -12,6 +12,8 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowi
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -34,10 +36,7 @@ public class FollowService {
         executor.execute(getFollowingTask);
     }
 
-    public interface GetFollowersObserver {
-        void handleSuccess(List<User> followers, boolean hasMorePages);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public interface GetFollowersObserver extends PagedObserver<User> {
     }
 
     public void getFollowers(AuthToken currUserAuthToken, User user, int pageSize, User lastFollower, GetFollowersObserver getFollowersObserver) {
