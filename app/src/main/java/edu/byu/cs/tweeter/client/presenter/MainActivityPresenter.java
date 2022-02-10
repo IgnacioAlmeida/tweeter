@@ -98,9 +98,8 @@ public class MainActivityPresenter {
     }
 
     public class GetUnfollowObserver implements FollowService.GetUnfollowObserver {
-
         @Override
-        public void handleSuccess(boolean follow) {
+        public void handleSuccess(Boolean status) {
             view.handleSuccess(false);
         }
 
@@ -115,6 +114,8 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
 
         }
+
+
     }
 
     public void follow(User selectedUser) {
@@ -124,7 +125,7 @@ public class MainActivityPresenter {
     public class GetFollowObserver implements FollowService.GetFollowObserver {
 
         @Override
-        public void handleSuccess(boolean follow) {
+        public void handleSuccess(Boolean status) {
             view.handleSuccess(true);
         }
 
@@ -139,6 +140,7 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
 
         }
+
     }
 
 
