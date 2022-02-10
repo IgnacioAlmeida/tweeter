@@ -10,9 +10,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
-import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class PagedTaskHandler<T extends ServiceObserver> extends Handler {
     private T observer;
