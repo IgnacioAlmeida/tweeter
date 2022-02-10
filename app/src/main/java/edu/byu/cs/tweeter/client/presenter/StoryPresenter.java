@@ -5,6 +5,7 @@ import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.view.main.story.StoryFragment;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -86,7 +87,7 @@ public class StoryPresenter {
         }
     }
 
-    public class GetFeedObserver implements FeedService.GetFeedObserver {
+    public class GetFeedObserver implements PagedObserver<Status> {
 
         @Override
         public void handleSuccess(List<Status> statuses, boolean hasMorePages) {

@@ -15,21 +15,14 @@ import java.util.concurrent.Executors;
 
 public class FeedService {
 
-    public interface GetFeedObserver extends PagedObserver<Status> {
-    }
-
-    public void getFeed(AuthToken currUserAuthToken, User user, int pageSize, Status lastStatus, GetFeedObserver getFeedObserver) {
+    public void getFeed(AuthToken currUserAuthToken, User user, int pageSize, Status lastStatus, PagedObserver<Status> getFeedObserver) {
         GetFeedTask getFeedTask = new GetFeedTask(currUserAuthToken,
                 user, pageSize, lastStatus, new PagedNotificationHandler(getFeedObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFeedTask);
     }
 
-
-    public interface GetPostStatusObserver extends SimpleNotificationObserver {
-    }
-
-    public void postStatus(AuthToken currUserAuthToken, Status newStatus, GetPostStatusObserver getPostStatusObserver) {
+    public void postStatus(AuthToken currUserAuthToken, Status newStatus, SimpleNotificationObserver getPostStatusObserver) {
         PostStatusTask statusTask = new PostStatusTask(currUserAuthToken,
                 newStatus, new SimpleNotificationHandler(getPostStatusObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();

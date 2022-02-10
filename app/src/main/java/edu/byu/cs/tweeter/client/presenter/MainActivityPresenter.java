@@ -4,6 +4,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -200,7 +201,7 @@ public class MainActivityPresenter {
 
     }
 
-    public class GetPostStatusObserver implements FeedService.GetPostStatusObserver {
+    public class GetPostStatusObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleFailure(String message) {
