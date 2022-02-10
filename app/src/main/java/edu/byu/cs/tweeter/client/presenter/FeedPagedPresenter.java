@@ -10,16 +10,8 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 import java.util.List;
 
-public class FeedPresenter {
-
-    public interface View {
-        void displayErrorMessage(String message);
-        void handleSuccess(User user);
-        void setLoadingStatus(boolean value);
-        void handleFeedSuccess(List<Status> statuses);
-    }
-
-    private View view;
+public class FeedPagedPresenter extends PagedPresenter<User> {
+    private PagedPresenter pagedPresenter;
     private UserService userService;
     private FeedService feedService;
     private static final int PAGE_SIZE = 10;
@@ -42,8 +34,9 @@ public class FeedPresenter {
     }
 
 
-    public FeedPresenter(View view) {
-        this.view = view;
+    public FeedPagedPresenter(View view) {
+        super(view);
+        this.pagedPresenter = new PagedPresenter(view);
         userService = new UserService();
         feedService = new FeedService();
     }
@@ -70,21 +63,19 @@ public class FeedPresenter {
 
         @Override
         public void handleFailure(String message) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get feed: " + message);
+            String failurePrefix = "Failed to get feed: ";
+            pagedPresenter.handleFailure(failurePrefix, message, isLoading);
         }
 
         @Override
         public void handleException(Exception exception) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
+            String exceptionPrefix = "Failed to get feed because of exception: ";
+            pagedPresenter.handleException(exceptionPrefix,exception,isLoading);
         }
     }
 
     public void loadUser(String userAlias) {
-        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new FeedPresenter.GetUserObserver());
+        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new FeedPagedPresenter.GetUserObserver());
     }
 
 

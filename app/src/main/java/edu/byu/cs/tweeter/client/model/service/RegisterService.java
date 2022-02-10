@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.ExecuteExecutor;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.AuthenticatedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticatedObserver;

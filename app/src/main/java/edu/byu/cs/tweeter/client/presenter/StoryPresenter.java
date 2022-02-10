@@ -15,23 +15,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class StoryPresenter {
-
-
-
-    public interface View {
-        void displayErrorMessage(String message);
-        void handleSuccess(User user);
-        void setLoadingStatus(boolean value);
-        void handleFeedSuccess(List<Status> statuses);
-
-    }
-
-    private View view;
+public class StoryPresenter extends PagedPresenter<Status> {
     private UserService userService;
     private static final int PAGE_SIZE = 10;
     private FeedService feedService;
-
+    private PagedPresenter pagedPresenter;
     private Status lastStatus;
 
     private boolean hasMorePages;
@@ -50,7 +38,8 @@ public class StoryPresenter {
     }
 
     public StoryPresenter(View view){
-        this.view = view;
+        super(view);
+        pagedPresenter = new PagedPresenter(view);
         userService = new UserService();
         feedService = new FeedService();
     }
@@ -101,16 +90,14 @@ public class StoryPresenter {
 
         @Override
         public void handleFailure(String message) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get feed: " + message);
+            String failurePrefix = "Failed to get feed: ";
+            pagedPresenter.handleFailure(failurePrefix,message,isLoading);
         }
 
         @Override
         public void handleException(Exception exception) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
+            String exceptionPrefix = "Failed to get feed because of exception: ";
+            pagedPresenter.handleException(exceptionPrefix,exception,isLoading);
         }
     }
 }

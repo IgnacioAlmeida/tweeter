@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import edu.byu.cs.tweeter.client.presenter.FollowersPresenter;
+import edu.byu.cs.tweeter.client.presenter.FollowersPagedPresenter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Followers" tab.
  */
-public class FollowersFragment extends Fragment implements FollowersPresenter.View{
+public class FollowersFragment extends Fragment implements FollowersPagedPresenter.View{
 
     private static final String LOG_TAG = "FollowersFragment";
     private static final String USER_KEY = "UserKey";
@@ -45,7 +45,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
 
     private FollowersRecyclerViewAdapter followersRecyclerViewAdapter;
 
-    private FollowersPresenter presenter;
+    private FollowersPagedPresenter presenter;
     /**
      * Creates an instance of the fragment and places the target user in an arguments
      * bundle assigned to the fragment.
@@ -81,7 +81,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
 
         followersRecyclerView.addOnScrollListener(new FollowRecyclerViewPaginationScrollListener(layoutManager));
 
-        presenter = new FollowersPresenter(this);
+        presenter = new FollowersPagedPresenter(this);
         presenter.loadMoreItems(user);
 
         return view;
@@ -104,8 +104,8 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
     }
 
     @Override
-    public void addFollowers(List<User> followers) {
-        followersRecyclerViewAdapter.addItems(followers);
+    public void handleFeedSuccess(List list) {
+        followersRecyclerViewAdapter.addItems(list);
     }
 
     @Override
