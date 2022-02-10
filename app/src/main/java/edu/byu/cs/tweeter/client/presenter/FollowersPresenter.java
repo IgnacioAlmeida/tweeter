@@ -5,6 +5,7 @@ import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 import java.util.List;
@@ -87,7 +88,7 @@ public class FollowersPresenter {
 
     }
 
-    public class GetUserObserver implements UserService.GetUserObserver {
+    public class GetUserObserver implements UserObserver {
         @Override
         public void handleSuccess(User user) {
             view.handleSuccess(user);

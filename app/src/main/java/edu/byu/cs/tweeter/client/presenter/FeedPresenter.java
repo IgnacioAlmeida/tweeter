@@ -4,6 +4,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -87,7 +88,7 @@ public class FeedPresenter {
     }
 
 
-    public class GetUserObserver implements UserService.GetUserObserver {
+    public class GetUserObserver implements UserObserver {
         @Override
         public void handleSuccess(User user) {
             view.handleSuccess(user);

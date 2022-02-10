@@ -6,6 +6,7 @@ import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.client.view.main.story.StoryFragment;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -58,7 +59,7 @@ public class StoryPresenter {
         userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
     }
 
-    public class GetUserObserver implements UserService.GetUserObserver {
+    public class GetUserObserver implements UserObserver {
         @Override
         public void handleSuccess(User user) {
             view.handleSuccess(user);
