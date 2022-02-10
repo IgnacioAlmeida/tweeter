@@ -1,19 +1,20 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import edu.byu.cs.tweeter.client.model.service.RegisterService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterHandler extends Handler {
-    private RegisterService.GetRegisterObserver observer;
+public abstract class AuthenticatedTaskHandler<T extends ServiceObserver> extends Handler {
+    private T observer;
 
-    public RegisterHandler(RegisterService.GetRegisterObserver observer) {
+    public AuthenticatedTaskHandler(T observer) {
         this.observer = observer;
     }
 
@@ -23,7 +24,7 @@ public class RegisterHandler extends Handler {
         if (success) {
             User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
             AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
-            observer.handleSuccess(registeredUser, authToken);
+            handleSuccess(msg.getData(), observer, registeredUser, authToken);
         } else if (msg.getData().containsKey(RegisterTask.MESSAGE_KEY)) {
             String message = msg.getData().getString(RegisterTask.MESSAGE_KEY);
             observer.handleFailure(message);
@@ -32,4 +33,6 @@ public class RegisterHandler extends Handler {
             observer.handleException(ex);
         }
     }
+
+    protected abstract void handleSuccess(Bundle data, T observer, User registeredUser, AuthToken authToken);
 }
