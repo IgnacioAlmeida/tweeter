@@ -227,7 +227,7 @@ public class MainActivityPresenter {
     public class GetLogoutObserver implements LoginService.GetLogoutObserver {
 
         @Override
-        public void handleSuccess() {
+        public void handleSuccess(Boolean status) {
             view.handleLogoutSuccess();
         }
 
@@ -242,6 +242,7 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to logout because of exception: " + ex.getMessage());
 
         }
+
     }
 
 
