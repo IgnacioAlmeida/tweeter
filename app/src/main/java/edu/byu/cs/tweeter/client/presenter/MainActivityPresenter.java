@@ -4,6 +4,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FeedService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CounterObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -98,7 +99,7 @@ public class MainActivityPresenter {
         followService.unfollow(Cache.getInstance().getCurrUserAuthToken(),selectedUser, new GetUnfollowObserver());
     }
 
-    public class GetUnfollowObserver implements FollowService.GetUnfollowObserver {
+    public class GetUnfollowObserver implements SimpleNotificationObserver {
         @Override
         public void handleSuccess(Boolean status) {
             view.handleSuccess(false);
@@ -123,7 +124,7 @@ public class MainActivityPresenter {
         followService.follow(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowObserver());
     }
 
-    public class GetFollowObserver implements FollowService.GetFollowObserver {
+    public class GetFollowObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess(Boolean status) {
@@ -149,7 +150,7 @@ public class MainActivityPresenter {
         followService.getFollowingCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowingCounterObserver(), executor);
     }
 
-    public class GetFollowingCounterObserver implements FollowService.GetFollowingCounterObserver {
+    public class GetFollowingCounterObserver implements CounterObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -175,7 +176,7 @@ public class MainActivityPresenter {
         followService.getFollowersCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowersCounterObserver(), executor);
     }
 
-    public class GetFollowersCounterObserver implements FollowService.GetFollowersCounterObserver {
+    public class GetFollowersCounterObserver implements CounterObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -194,7 +195,6 @@ public class MainActivityPresenter {
 
         }
     }
-
 
     public void postStatus(Status newStatus) {
         feedService.postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
@@ -225,7 +225,7 @@ public class MainActivityPresenter {
         Cache.getInstance().clearCache();//TODO Is this the right place to clear cache?
     }
 
-    public class GetLogoutObserver implements LoginService.GetLogoutObserver {
+    public class GetLogoutObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess(Boolean status) {

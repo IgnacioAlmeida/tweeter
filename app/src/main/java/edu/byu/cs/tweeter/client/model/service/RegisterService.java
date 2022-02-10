@@ -9,16 +9,10 @@ import java.util.concurrent.Executors;
 
 public class RegisterService {
 
-
-
-    public interface GetRegisterObserver extends AuthenticatedObserver {
-    }
-
-    public void gerRegistering(String firstName, String lastName, String alias, String password, String imageBytesBase64, GetRegisterObserver getRegisterObserver) {
+    public void gerRegistering(String firstName, String lastName, String alias, String password, String imageBytesBase64, AuthenticatedObserver getRegisterObserver) {
         RegisterTask registerTask = new RegisterTask(firstName, lastName,
                 alias, password, imageBytesBase64, new AuthenticatedNotificationHandler(getRegisterObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(registerTask);
     }
-
 }

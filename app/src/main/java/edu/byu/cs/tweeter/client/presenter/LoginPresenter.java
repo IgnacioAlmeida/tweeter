@@ -2,6 +2,7 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import android.widget.EditText;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticatedObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -35,7 +36,7 @@ public class LoginPresenter {
         loginService.getLogin(id, password, new GetLoginObserver());
     }
 
-    public class GetLoginObserver implements LoginService.GetLoginObserver {
+    public class GetLoginObserver implements AuthenticatedObserver {
 
         @Override
         public void handleSuccess(User user, AuthToken authToken) {

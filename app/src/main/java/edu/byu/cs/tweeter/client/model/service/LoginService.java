@@ -13,27 +13,15 @@ import java.util.concurrent.Executors;
 
 public class LoginService {
 
-
-
-    public interface GetLoginObserver extends AuthenticatedObserver {
-    }
-
-    public void getLogin(String id, String password, GetLoginObserver getLoginObserver) {
+    public void getLogin(String id, String password, AuthenticatedObserver getLoginObserver) {
         LoginTask loginTask = new LoginTask(id, password, new AuthenticatedNotificationHandler(getLoginObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(loginTask);
     }
 
-
-    public interface GetLogoutObserver extends SimpleNotificationObserver {
-
-    }
-
-    public void logout(AuthToken currUserAuthToken, GetLogoutObserver getLogoutObserver) {
+    public void logout(AuthToken currUserAuthToken, SimpleNotificationObserver getLogoutObserver) {
         LogoutTask logoutTask = new LogoutTask(currUserAuthToken, new SimpleNotificationHandler(getLogoutObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }
-
-
 }
