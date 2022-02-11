@@ -1,6 +1,7 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import android.widget.EditText;
+
 import edu.byu.cs.tweeter.client.model.service.LoginService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticatedObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -12,6 +13,7 @@ public class LoginPresenter {
         void displayErrorMessage(String message);
         void handleSuccess(User user, AuthToken authToken);
     }
+
     private View view;
     private LoginService loginService;
     public LoginPresenter(View view) {

@@ -4,9 +4,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
-import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class Presenter<T> {
@@ -18,7 +16,6 @@ public abstract class Presenter<T> {
     protected User user;
     protected boolean hasMorePages = true;
     protected T lastStatus = null;
-    protected User lastFollowerFollowee;
     protected boolean isLoading = false;
 
     public Presenter(View view) {
