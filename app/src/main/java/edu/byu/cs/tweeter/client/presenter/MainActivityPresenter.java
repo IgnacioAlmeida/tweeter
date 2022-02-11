@@ -129,13 +129,13 @@ public class MainActivityPresenter {
 
         @Override
         public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to unfollow: " + message);
+            view.displayErrorMessage("Failed to follow: " + message);
 
         }
 
         @Override
         public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
+            view.displayErrorMessage("Failed to follow because of exception: " + exception.getMessage());
 
         }
 
@@ -218,7 +218,7 @@ public class MainActivityPresenter {
 
     public void logout() {
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new GetLogoutObserver());
-        Cache.getInstance().clearCache();//TODO Is this the right place to clear cache?
+        Cache.getInstance().clearCache();
     }
 
     public class GetLogoutObserver implements SimpleNotificationObserver {
