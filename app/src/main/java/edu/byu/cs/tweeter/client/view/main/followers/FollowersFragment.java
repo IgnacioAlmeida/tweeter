@@ -19,13 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import edu.byu.cs.tweeter.client.presenter.FollowersPresenter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.client.R;
+import edu.byu.cs.tweeter.client.presenter.FollowersPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -104,7 +104,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
     }
 
     @Override
-    public void addFollowers(List<User> followers) {
+    public void successfulAdd(List followers) {
         followersRecyclerViewAdapter.addItems(followers);
     }
 

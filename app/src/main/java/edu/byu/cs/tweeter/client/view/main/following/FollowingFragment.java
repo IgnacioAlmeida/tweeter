@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.client.R;
-
 import edu.byu.cs.tweeter.client.presenter.FollowingPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -109,9 +108,10 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
     }
 
     @Override
-    public void addFollowees(List<User> followees) {
-        followingRecyclerViewAdapter.addItems(followees);
+    public void successfulAdd(List list) {
+        followingRecyclerViewAdapter.addItems(list);
     }
+
 
     /**
      * The ViewHolder for the RecyclerView that displays the Following data.

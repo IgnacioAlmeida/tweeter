@@ -1,12 +1,5 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.service.FeedService;
-import edu.byu.cs.tweeter.client.model.service.FollowService;
-import edu.byu.cs.tweeter.client.model.service.LoginService;
-import edu.byu.cs.tweeter.model.domain.Status;
-import edu.byu.cs.tweeter.model.domain.User;
-
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,11 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.service.FeedService;
+import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CounterObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.domain.User;
+
 public class MainActivityPresenter {
-
-
-
-
     public interface View {
         void displayErrorMessage(String message);
         void handleSuccess(boolean follow);
@@ -97,10 +95,9 @@ public class MainActivityPresenter {
         followService.unfollow(Cache.getInstance().getCurrUserAuthToken(),selectedUser, new GetUnfollowObserver());
     }
 
-    public class GetUnfollowObserver implements FollowService.GetUnfollowObserver {
-
+    public class GetUnfollowObserver implements SimpleNotificationObserver {
         @Override
-        public void handleSuccess(boolean follow) {
+        public void handleSuccess(Boolean status) {
             view.handleSuccess(false);
         }
 
@@ -115,30 +112,33 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
 
         }
+
+
     }
 
     public void follow(User selectedUser) {
         followService.follow(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowObserver());
     }
 
-    public class GetFollowObserver implements FollowService.GetFollowObserver {
+    public class GetFollowObserver implements SimpleNotificationObserver {
 
         @Override
-        public void handleSuccess(boolean follow) {
+        public void handleSuccess(Boolean status) {
             view.handleSuccess(true);
         }
 
         @Override
         public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to unfollow: " + message);
+            view.displayErrorMessage("Failed to follow: " + message);
 
         }
 
         @Override
         public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
+            view.displayErrorMessage("Failed to follow because of exception: " + exception.getMessage());
 
         }
+
     }
 
 
@@ -146,7 +146,7 @@ public class MainActivityPresenter {
         followService.getFollowingCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowingCounterObserver(), executor);
     }
 
-    public class GetFollowingCounterObserver implements FollowService.GetFollowingCounterObserver {
+    public class GetFollowingCounterObserver implements CounterObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -172,7 +172,7 @@ public class MainActivityPresenter {
         followService.getFollowersCounter(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowersCounterObserver(), executor);
     }
 
-    public class GetFollowersCounterObserver implements FollowService.GetFollowersCounterObserver {
+    public class GetFollowersCounterObserver implements CounterObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -192,18 +192,12 @@ public class MainActivityPresenter {
         }
     }
 
-
     public void postStatus(Status newStatus) {
         feedService.postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
 
     }
 
-    public class GetPostStatusObserver implements FeedService.GetPostStatusObserver {
-
-        @Override
-        public void handleSuccess() {
-            view.handlePostSuccess();
-        }
+    public class GetPostStatusObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleFailure(String message) {
@@ -215,17 +209,22 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to post status because of exception: " + exception.getMessage());
 
         }
+
+        @Override
+        public void handleSuccess(Boolean status) {
+            view.handlePostSuccess();
+        }
     }
 
     public void logout() {
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new GetLogoutObserver());
-        Cache.getInstance().clearCache();//TODO Is this the right place to clear cache?
+        Cache.getInstance().clearCache();
     }
 
-    public class GetLogoutObserver implements LoginService.GetLogoutObserver {
+    public class GetLogoutObserver implements SimpleNotificationObserver {
 
         @Override
-        public void handleSuccess() {
+        public void handleSuccess(Boolean status) {
             view.handleLogoutSuccess();
         }
 
@@ -240,6 +239,7 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to logout because of exception: " + ex.getMessage());
 
         }
+
     }
 
 
@@ -268,8 +268,6 @@ public class MainActivityPresenter {
             view.displayErrorMessage("Failed to determine following relationship because of exception: " + exception.getMessage());
         }
     }
-
-
 
     public List<String> parseMentions(String post) {
         List<String> containedMentions = new ArrayList<>();

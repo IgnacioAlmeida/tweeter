@@ -3,12 +3,14 @@ package edu.byu.cs.tweeter.client.presenter;
 import android.graphics.Bitmap;
 import android.widget.EditText;
 import android.widget.ImageView;
-import edu.byu.cs.tweeter.client.model.service.RegisterService;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
+
+import edu.byu.cs.tweeter.client.model.service.RegisterService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.AuthenticatedObserver;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.User;
 
 public class RegisterPresenter {
 
@@ -60,7 +62,7 @@ public class RegisterPresenter {
         registerService.gerRegistering(firstName, lastName, alias, password, imageBytesBase64, new GetRegisterObserver());
     }
 
-    public class GetRegisterObserver implements RegisterService.GetRegisterObserver {
+    public class GetRegisterObserver implements AuthenticatedObserver {
 
         @Override
         public void handleSuccess(User registeredUser, AuthToken authToken) {
