@@ -269,8 +269,6 @@ public class MainActivityPresenter {
         }
     }
 
-
-
     public List<String> parseMentions(String post) {
         List<String> containedMentions = new ArrayList<>();
         for (String word : post.split("\\s")) {

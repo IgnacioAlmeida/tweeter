@@ -13,9 +13,6 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowingPresenter extends PagedPresenterUser{
     private FollowService followService;
 
-    private User lastFollowee;
-
-
     public FollowingPresenter(View view) {
         super(view);
         followService = new FollowService();
@@ -25,20 +22,15 @@ public class FollowingPresenter extends PagedPresenterUser{
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
             view.setLoadingStatus(true);
-            followService.getFollowing(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastFollowee, new GetFollowingObserver());
+            followService.getFollowing(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastFollowerFollowee, new GetFollowingObserver());
         }
-
     }
 
     public class GetFollowingObserver implements PagedObserver<User> {
 
         @Override
         public void handleSuccess(List list, boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            lastFollowee = (list.size() > 0) ? (User) list.get(list.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.successfulAdd(list);
+            presenterHandleSuccess(list, hasMorePages);
         }
 
         @Override

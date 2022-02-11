@@ -17,8 +17,8 @@ public abstract class Presenter<T> {
 
     protected User user;
     protected boolean hasMorePages = true;
-    protected Status lastStatus = null;
-    protected User lastFollower;
+    protected T lastStatus = null;
+    protected User lastFollowerFollowee;
     protected boolean isLoading = false;
 
     public Presenter(View view) {
@@ -45,13 +45,6 @@ public abstract class Presenter<T> {
         return isLoading;
     }
 
-    protected User getLastFollower() {
-        return lastFollower;
-    }
-
-    protected void setLastFollower(User lastFollower) {
-        this.lastFollower = lastFollower;
-    }
 
     public void handleFailure(String failurePrefix, String message, boolean isLoading) {
         handler(isLoading, failurePrefix + message);
@@ -86,6 +79,14 @@ public abstract class Presenter<T> {
     }
     public void loadUser(String userAlias) {
         userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
+    }
+
+    public void presenterHandleSuccess(List<T> list, boolean hasMorePages) {
+        isLoading = false;
+        view.setLoadingStatus(false);
+        lastStatus = (list.size() > 0) ? list.get(list.size() - 1) : null;
+        setHasMorePages(hasMorePages);
+        view.successfulAdd(list);
     }
 
 }

@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import edu.byu.cs.tweeter.client.presenter.StoryPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenterStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
@@ -46,7 +46,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Story" tab.
  */
-public class StoryFragment extends Fragment implements StoryPresenter.View{
+public class StoryFragment extends Fragment implements PagedPresenterStatus.View{
     private static final String LOG_TAG = "StoryFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -55,7 +55,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
 
 
     private User user;
-    private StoryPresenter presenter;
+    private PagedPresenterStatus presenter;
     private StoryRecyclerViewAdapter storyRecyclerViewAdapter;
 
     /**
@@ -93,7 +93,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
 
         storyRecyclerView.addOnScrollListener(new StoryRecyclerViewPaginationScrollListener(layoutManager));
 
-        presenter = new StoryPresenter(this);
+        presenter = new PagedPresenterStatus(this);
         presenter.loadMoreItems(user);
 
         return view;

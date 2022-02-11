@@ -19,35 +19,30 @@ public class FollowersPresenter extends PagedPresenterUser {
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
             view.setLoadingStatus(true);
-            followService.getFollowers(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastFollower, new GetFollowersObserver());
+            followService.getFollowers(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastFollowerFollowee, new GetFollowersObserver());
         }
     }
 
     public class GetFollowersObserver implements PagedObserver<User> {
 
         @Override
-        public void handleFailure(String message) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get followers: " + message);
+        public void handleSuccess(List list, boolean hasMorePages) {
+            presenterHandleSuccess(list, hasMorePages);
+        }
 
+        @Override
+        public void handleFailure(String message) {
+            String failurePrefix =  "Failed to get followers: ";
+            view.displayErrorMessage(failurePrefix + message);
         }
 
         @Override
         public void handleException(Exception exception) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get followers because of exception: " + exception.getMessage());
+            String exceptionPrefix = "Failed to get followers because of exception: ";
+            view.displayErrorMessage(exceptionPrefix + exception.getMessage());
         }
 
-        @Override
-        public void handleSuccess(List list, boolean hasMorePages) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            lastFollower = (list.size() > 0) ? (User) list.get(list.size() - 1) : null;
-            setHasMorePages(hasMorePages);
-            view.successfulAdd(list);
-        }
+
     }
 }
 

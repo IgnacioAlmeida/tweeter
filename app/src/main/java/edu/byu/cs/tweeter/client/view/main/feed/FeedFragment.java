@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import edu.byu.cs.tweeter.client.presenter.FeedPresenter;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
@@ -38,6 +37,7 @@ import java.util.concurrent.Executors;
 import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenterStatus;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -45,7 +45,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Feed" tab.
  */
-public class FeedFragment extends Fragment implements FeedPresenter.View{
+public class FeedFragment extends Fragment implements PagedPresenterStatus.View{
     private static final String LOG_TAG = "FeedFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -53,7 +53,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
     private static final int ITEM_VIEW = 1;
 
     private User user;
-    private FeedPresenter presenter;
+    private PagedPresenterStatus presenter;
     private FeedRecyclerViewAdapter feedRecyclerViewAdapter;
 
     /**
@@ -91,7 +91,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
 
         feedRecyclerView.addOnScrollListener(new FeedRecyclerViewPaginationScrollListener(layoutManager));
 
-        presenter = new FeedPresenter(this);
+        presenter = new PagedPresenterStatus(this);
         presenter.loadMoreItems(user);
 
         return view;
