@@ -15,11 +15,23 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class StoryPresenter extends PagedPresenter<Status> {
+public class StoryPresenter {
+
+
+
+    public interface View {
+        void displayErrorMessage(String message);
+        void handleSuccess(User user);
+        void setLoadingStatus(boolean value);
+        void handleFeedSuccess(List<Status> statuses);
+
+    }
+
+    private View view;
     private UserService userService;
     private static final int PAGE_SIZE = 10;
     private FeedService feedService;
-    private PagedPresenter pagedPresenter;
+
     private Status lastStatus;
 
     private boolean hasMorePages;
@@ -38,8 +50,7 @@ public class StoryPresenter extends PagedPresenter<Status> {
     }
 
     public StoryPresenter(View view){
-        super(view);
-        pagedPresenter = new PagedPresenter(view);
+        this.view = view;
         userService = new UserService();
         feedService = new FeedService();
     }
@@ -90,14 +101,16 @@ public class StoryPresenter extends PagedPresenter<Status> {
 
         @Override
         public void handleFailure(String message) {
-            String failurePrefix = "Failed to get feed: ";
-            pagedPresenter.handleFailure(failurePrefix,message,isLoading);
+            isLoading = false;
+            view.setLoadingStatus(false);
+            view.displayErrorMessage("Failed to get feed: " + message);
         }
 
         @Override
         public void handleException(Exception exception) {
-            String exceptionPrefix = "Failed to get feed because of exception: ";
-            pagedPresenter.handleException(exceptionPrefix,exception,isLoading);
+            isLoading = false;
+            view.setLoadingStatus(false);
+            view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
         }
     }
 }

@@ -10,8 +10,16 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 import java.util.List;
 
-public class FeedPagedPresenter extends PagedPresenter<User> {
-    private PagedPresenter pagedPresenter;
+public class FeedPresenter {
+
+    public interface View {
+        void displayErrorMessage(String message);
+        void handleSuccess(User user);
+        void setLoadingStatus(boolean value);
+        void handleFeedSuccess(List<Status> statuses);
+    }
+
+    private View view;
     private UserService userService;
     private FeedService feedService;
     private static final int PAGE_SIZE = 10;
@@ -34,9 +42,8 @@ public class FeedPagedPresenter extends PagedPresenter<User> {
     }
 
 
-    public FeedPagedPresenter(View view) {
-        super(view);
-        this.pagedPresenter = new PagedPresenter(view);
+    public FeedPresenter(View view) {
+        this.view = view;
         userService = new UserService();
         feedService = new FeedService();
     }
@@ -63,19 +70,21 @@ public class FeedPagedPresenter extends PagedPresenter<User> {
 
         @Override
         public void handleFailure(String message) {
-            String failurePrefix = "Failed to get feed: ";
-            pagedPresenter.handleFailure(failurePrefix, message, isLoading);
+            isLoading = false;
+            view.setLoadingStatus(false);
+            view.displayErrorMessage("Failed to get feed: " + message);
         }
 
         @Override
         public void handleException(Exception exception) {
-            String exceptionPrefix = "Failed to get feed because of exception: ";
-            pagedPresenter.handleException(exceptionPrefix,exception,isLoading);
+            isLoading = false;
+            view.setLoadingStatus(false);
+            view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
         }
     }
 
     public void loadUser(String userAlias) {
-        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new FeedPagedPresenter.GetUserObserver());
+        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new FeedPresenter.GetUserObserver());
     }
 
 

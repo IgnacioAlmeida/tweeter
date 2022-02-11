@@ -16,10 +16,12 @@ public class FollowingPresenter {
     //The View tells the fragment what to show
     public interface View {
         void displayErrorMessage(String message);
-        void handleSuccess(User user);
+
         void setLoadingStatus(boolean value);
+
         void addFollowees(List<User> followees);
 
+        void handleSuccess(User user);
     }
 
     private View view;
@@ -79,17 +81,14 @@ public class FollowingPresenter {
         public void handleFailure(String message) {
             isLoading = false;
             view.setLoadingStatus(false);
-            String failurePrefix =  "Failed to get following: ";
-
-            view.displayErrorMessage(failurePrefix + message);
+            view.displayErrorMessage("Failed to get following: " + message);
         }
 
         @Override
         public void handleException(Exception exception) {
             isLoading = false;
             view.setLoadingStatus(false);
-            String exceptionPrefix = "Failed to get following because of exception: ";
-            view.displayErrorMessage(exceptionPrefix + exception.getMessage());
+            view.displayErrorMessage("Failed to get following because of exception: " + exception.getMessage());
         }
     }
 
