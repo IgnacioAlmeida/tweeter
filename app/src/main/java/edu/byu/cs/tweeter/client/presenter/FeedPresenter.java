@@ -10,41 +10,13 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 import java.util.List;
 
-public class FeedPresenter {
-
-    public interface View {
-        void displayErrorMessage(String message);
-        void handleSuccess(User user);
-        void setLoadingStatus(boolean value);
-        void handleFeedSuccess(List<Status> statuses);
-    }
-
-    private View view;
-    private UserService userService;
+public class FeedPresenter extends PagedPresenterStatus{
     private FeedService feedService;
-    private static final int PAGE_SIZE = 10;
 
     private Status lastStatus;
 
-    private boolean hasMorePages;
-    private boolean isLoading = false;
-
-    public boolean hasMorePages() {
-        return hasMorePages;
-    }
-
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-
     public FeedPresenter(View view) {
-        this.view = view;
-        userService = new UserService();
+        super(view);
         feedService = new FeedService();
     }
 
@@ -58,14 +30,13 @@ public class FeedPresenter {
     }
 
     public class GetFeedObserver implements PagedObserver<Status> {
-
         @Override
         public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingStatus(false);
             lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.handleFeedSuccess(statuses);
+            view.successfulAdd(statuses);
         }
 
         @Override
@@ -83,26 +54,4 @@ public class FeedPresenter {
         }
     }
 
-    public void loadUser(String userAlias) {
-        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new FeedPresenter.GetUserObserver());
-    }
-
-
-    public class GetUserObserver implements UserObserver {
-        @Override
-        public void handleSuccess(User user) {
-            view.handleSuccess(user);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get user's profile: " + message);
-
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get user's profile because of exception: " + exception.getMessage());
-        }
-    }
 }

@@ -125,9 +125,10 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
     }
 
     @Override
-    public void handleFeedSuccess(List<Status> statuses) {
-        feedRecyclerViewAdapter.addItems(statuses);
+    public void successfulAdd(List list) {
+        feedRecyclerViewAdapter.addItems(list);
     }
+
 
     /**
      * The ViewHolder for the RecyclerView that displays the feed data.

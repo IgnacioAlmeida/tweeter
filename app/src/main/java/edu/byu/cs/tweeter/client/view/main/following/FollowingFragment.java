@@ -109,9 +109,10 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
     }
 
     @Override
-    public void addFollowees(List<User> followees) {
-        followingRecyclerViewAdapter.addItems(followees);
+    public void successfulAdd(List list) {
+        followingRecyclerViewAdapter.addItems(list);
     }
+
 
     /**
      * The ViewHolder for the RecyclerView that displays the Following data.

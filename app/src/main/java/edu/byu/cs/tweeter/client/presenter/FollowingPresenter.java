@@ -10,50 +10,15 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedObse
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowingPresenter {
-    private static final int PAGE_SIZE = 10;
-
-    //The View tells the fragment what to show
-    public interface View {
-        void displayErrorMessage(String message);
-
-        void setLoadingStatus(boolean value);
-
-        void addFollowees(List<User> followees);
-
-        void handleSuccess(User user);
-    }
-
-    private View view;
+public class FollowingPresenter extends PagedPresenterUser{
     private FollowService followService;
-    private UserService userService;
 
     private User lastFollowee;
 
-    public boolean hasMorePages() {
-        return hasMorePages;
-    }
-
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
-    }
-
-    private boolean hasMorePages;
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-
-    private boolean isLoading = false;
 
     public FollowingPresenter(View view) {
-        this.view = view;
+        super(view);
         followService = new FollowService();
-        userService = new UserService();
     }
 
     public void loadMoreItems(User user) {
@@ -65,53 +30,28 @@ public class FollowingPresenter {
 
     }
 
-
     public class GetFollowingObserver implements PagedObserver<User> {
 
         @Override
-        public void handleSuccess(List<User> followees, boolean hasMorePages) {
+        public void handleSuccess(List list, boolean hasMorePages) {
             isLoading = false;
             view.setLoadingStatus(false);
-            lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
+            lastFollowee = (list.size() > 0) ? (User) list.get(list.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addFollowees(followees);
+            view.successfulAdd(list);
         }
 
         @Override
         public void handleFailure(String message) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get following: " + message);
+            String failurePrefix =  "Failed to get following: ";
+            view.displayErrorMessage(failurePrefix + message);
         }
 
         @Override
         public void handleException(Exception exception) {
-            isLoading = false;
-            view.setLoadingStatus(false);
-            view.displayErrorMessage("Failed to get following because of exception: " + exception.getMessage());
+            String exceptionPrefix = "Failed to get following because of exception: ";
+            view.displayErrorMessage(exceptionPrefix + exception.getMessage());
         }
     }
 
-    public void loadUser(String userAlias) {
-        userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
-    }
-
-    public class GetUserObserver implements UserObserver {
-        @Override
-        public void handleSuccess(User user) {
-            view.handleSuccess(user);
-
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get user's profile: " + message);
-
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get user's profile because of exception: " + exception.getMessage());
-        }
-    }
 }

@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 public class MainActivityPresenter {
-
-
-
-
     public interface View {
         void displayErrorMessage(String message);
         void handleSuccess(boolean follow);
