@@ -204,7 +204,6 @@ public class MainActivityPresenter {
     public void postStatus(Status newStatus) {
         view.displayInfoMessage("Posting Status...");
         getFeedService().postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
-
     }
 
     public class GetPostStatusObserver implements SimpleNotificationObserver {
