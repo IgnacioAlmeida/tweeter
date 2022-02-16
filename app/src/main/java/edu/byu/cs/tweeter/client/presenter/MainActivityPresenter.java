@@ -27,6 +27,7 @@ public class MainActivityPresenter {
         void handlePostSuccess();
         void handleLogoutSuccess();
         void handleIsFollowerSuccess(boolean isFollower);
+        void displayInfoMessage(String message);
 
     }
     private View view;
@@ -37,9 +38,16 @@ public class MainActivityPresenter {
     public MainActivityPresenter(View view) {
         this.view = view;
         followService = new FollowService();
-        feedService = new FeedService();
+//        feedService = getFeedService();
         loginService = new LoginService();
 
+    }
+
+    protected FeedService getFeedService() {
+        if(feedService == null){
+            feedService = new FeedService();
+        }
+        return feedService;
     }
 
     public String getFormattedDateTime() throws ParseException {
@@ -192,8 +200,10 @@ public class MainActivityPresenter {
         }
     }
 
+    //TODO create tests  for post status
     public void postStatus(Status newStatus) {
-        feedService.postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
+        view.displayInfoMessage("Posting Status...");
+        getFeedService().postStatus(Cache.getInstance().getCurrUserAuthToken(), newStatus, new GetPostStatusObserver());
 
     }
 
@@ -218,13 +228,13 @@ public class MainActivityPresenter {
 
     public void logout() {
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new GetLogoutObserver());
-        Cache.getInstance().clearCache();
     }
 
     public class GetLogoutObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess(Boolean status) {
+            Cache.getInstance().clearCache();
             view.handleLogoutSuccess();
         }
 
